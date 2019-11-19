@@ -1,0 +1,34 @@
+# Refernce: https://www.vagrantup.com/docs/provisioning/docker.html
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.box_version = "20191030.0.0"
+  config.vm.box_check_update = true
+
+  config.vm.define "docker-host" do |docker_host|
+    docker_host.vm.hostname = "docker-host"
+    docker_host.vm.network "public_network", bridge: "wlo1", ip: "192.168.1.130"
+
+    docker_host.vm.provider "virtualbox" do |vb|
+      vb.gui = false
+      vb.memory = 2_048
+      vb.cpus = 2
+    end
+  end
+
+  # use docker provisioner instead of the shell provisioner
+  config.vm.provision "docker" do |d|
+    d.run "nginx", image: "nginx", args: "--publish 80:80"
+  end
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # NOTE: This will enable public access to the opened port
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine and only allow access
+  # via 127.0.0.1 to disable public access
+  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
+end
