@@ -10,7 +10,9 @@
     "files.insertFinalNewline": true,
     "markdownlint.ignore": ["**/*.md.html"],
     "files.associations": {
-      "*.md.html": "markdown"
+      "*.md.html": "markdown",
+      "*.env": "dotenv",
+      "Dockerfile*": "dockerfile"
     },
     "emeraldwalk.runonsave": {
       "commands": [
@@ -20,6 +22,7 @@
           "isAsync": false
         }
       ]
-    }
+    },
+    "shellformat.flag": "-i 2 -ci -sr -bn"
   }
 }

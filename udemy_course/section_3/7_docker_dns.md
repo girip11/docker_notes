@@ -28,7 +28,7 @@ ping -c 2 nginx
 
 * `docker container run --network-alias <domain_name>` or `docker container run --net-alias <domain_name>` - can make different containers respond to the same DNS domain name, given those containers are connected to the same bridge network.
 
-* verify with `nslookup <domain_name>`
+* Verify with `nslookup <domain_name>`
 
 ---
 

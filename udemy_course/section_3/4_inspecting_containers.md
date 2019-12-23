@@ -38,3 +38,5 @@ docker container stats webserver
 ## References
 
 * [Udemy docker course by Bret Fisher](https://www.udemy.com/share/101WekCUMfd1lVR34=/)
+* [docker container inspect reference](https://docs.docker.com/engine/reference/commandline/inspect/)
+* [Docker inspect template magic](https://blog.container-solutions.com/docker-inspect-template-magic)
