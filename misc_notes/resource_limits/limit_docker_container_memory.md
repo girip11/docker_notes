@@ -1,12 +1,4 @@
-# Limiting docker container memory
-
-## Enabling swap
-
-* `docker info` - If the output of this command contains **WARNING: Noswaplimitsupport**, then do the following as root user (below steps are applicable for ubuntu)
-  * Add `GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"` to **/etc/default/grub**. Save the file
-  * Execute the command `update-grub`
-  * Reboot the system
-* Verify if the warning has disappeared after reboot with `docker info` (no need to execute as root)
+# Setting Memory And CPU Limits In Docker
 
 ## Limiting container memory
 
@@ -28,17 +20,17 @@ docker container stats mem_no_limit
 docker container inspect mem_no_limit | grep -i Memory
 ```
 
-* From the container launched above, try the `free -m` command to check the available memory (should be a number close to the `docker info` command output).
+- From the container launched above, try the `free -m` command to check the available memory (should be a number close to the `docker info` command output).
 
 There are multiple ways to limit a container's memory usage.
 
-* Restricting memory while building the docker image. `docker image build --help`
-* While launching the container using the **--memory** option. `docker container run --help`
-* By associating the container with a **memory limit set cgroup**. `docker container run` accepts a **cgroup** option as well.
+- Restricting memory while building the docker image. `docker image build --help`
+- While launching the container using the **--memory** option. `docker container run --help`
+- By associating the container with a **memory limit set cgroup**. `docker container run` accepts a **cgroup** option as well.
 
 ## Memory limit using the run command's memory option
 
-* Memory limit units k(KB), m(MB), g(GB) can be used.
+- Memory limit units k(KB), m(MB), g(GB) can be used.
 
 ```bash
 # launch a container with the below command and verify its
@@ -49,16 +41,16 @@ docker container run --rm -it --name mem_with_limit --memory 512m  alpine:latest
 docker container stats mem_with_limit
 ```
 
-* `ContainerSwapMemory = (MemorySwap - Memory)`
+- `ContainerSwapMemory = (MemorySwap - Memory)`
 
-* When the memory limit is set, **by default the container's swap memory value is twice the allowed memory value.** This means the container's allowed swap memory is same in size as its allowed memory.
+- When the memory limit is set, **by default the container's swap memory value is twice the allowed memory value.** This means the container's allowed swap memory is same in size as its allowed memory.
 
 ```bash
 # check the MemorySwap and memory columns
 docker container inspect mem_with_limit | grep -i Memory
 ```
 
-* To **disable swap**, set the **--memory** and **--memory-swap** options to the same value.
+- To **disable swap**, set the **--memory** and **--memory-swap** options to the same value.
 
 ```bash
 docker container run --rm -it --name mem_with_limit --memory 512m --memory-swap 512m alpine:latest sh
@@ -76,7 +68,7 @@ docker container run --rm -it --name mem_no_limit alpine:latest free -m
 docker container run --rm -it --name mem_with_limit --memory 512m --memory-swap 512m alpine:latest free -m
 ```
 
-* To know if the container is killed because of **OutOfMemory(OOM)**, use the `docker container inspect` command.
+- To know if the container is killed because of **OutOfMemory(OOM)**, use the `docker container inspect` command.
 
 ```bash
 # Limit the memory to 50MB and disable swap, and try to use 60MB
@@ -98,7 +90,7 @@ docker container run --name memory_limit_stress --memory 50m --memory-swap 50m -
 docker container inspect memory_limit_stress | grep -i oom
 ```
 
-* When memory limit is set while launching the container, the same reflects in the cgroup file **memory.limit_in_bytes**. Get the **docker container ID** and search for the same inside the **`/sys/fs/cgroup/memory`** directory, if the cgroup is not known (default cgroup is **docker**).
+- When memory limit is set while launching the container, the same reflects in the cgroup file **memory.limit_in_bytes**. Get the **docker container ID** and search for the same inside the **`/sys/fs/cgroup/memory`** directory, if the cgroup is not known (default cgroup is **docker**).
 
 ```bash
 # This should print the memory limit set
@@ -109,8 +101,7 @@ cat /sys/fs/cgroup/memory/docker/<container_id>/memory.limit_in_bytes
 
 ## References
 
-* [Understanding Docker Container Memory Limit Behavior](https://medium.com/faun/understanding-docker-container-memory-limit-behavior-41add155236c)
-
-* [How to limit a docker container’s resources on ubuntu 18.04](https://hostadvice.com/how-to/how-to-limit-a-docker-containers-resources-on-ubuntu-18-04/)
-
-* [How Docker uses cgroups to set resource limits?](https://shekhargulati.com/2019/01/03/how-docker-uses-cgroups-to-set-resource-limits/)
+- [Understanding Docker Container Memory Limit Behavior](https://medium.com/faun/understanding-docker-container-memory-limit-behavior-41add155236c)
+- [How to limit a docker container’s resources on ubuntu 18.04](https://hostadvice.com/how-to/how-to-limit-a-docker-containers-resources-on-ubuntu-18-04/)
+- [How Docker uses cgroups to set resource limits?](https://shekhargulati.com/2019/01/03/how-docker-uses-cgroups-to-set-resource-limits/)
+- [Setting Memory And CPU Limits In Docker](https://www.baeldung.com/ops/docker-memory-limit)
