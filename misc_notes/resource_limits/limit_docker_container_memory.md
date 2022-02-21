@@ -1,5 +1,21 @@
 # Setting Memory And CPU Limits In Docker
 
+There are multiple ways to limit a container's resource(CPU/memory) usage.
+
+- Restricting while building the docker image. `docker image build --help`
+- By associating the container with a **resource restricted cgroup**. `docker container run` accepts a **cgroup-parent** option as well.
+- While launching the container using the **--memory** or `--cpus` option. `docker container run --help`. This will be container specific.
+
+## Limit container cpu
+
+```bash
+docker container run --cpus=2 nginx
+
+# cpu-shares acts like a priority of cpu allocation to the container
+# higher cpu share means higher priority
+docker container run --cpus=2 --cpu-shares=2000 nginx
+```
+
 ## Limiting container memory
 
 By default, a container can use all of its host's available memory.
@@ -22,13 +38,7 @@ docker container inspect mem_no_limit | grep -i Memory
 
 - From the container launched above, try the `free -m` command to check the available memory (should be a number close to the `docker info` command output).
 
-There are multiple ways to limit a container's memory usage.
-
-- Restricting memory while building the docker image. `docker image build --help`
-- While launching the container using the **--memory** option. `docker container run --help`
-- By associating the container with a **memory limit set cgroup**. `docker container run` accepts a **cgroup** option as well.
-
-## Memory limit using the run command's memory option
+### Memory limit using the run command's memory option
 
 - Memory limit units k(KB), m(MB), g(GB) can be used.
 
@@ -49,6 +59,14 @@ docker container stats mem_with_limit
 # check the MemorySwap and memory columns
 docker container inspect mem_with_limit | grep -i Memory
 ```
+
+### Soft limit using `memory-reservation`
+
+```bash
+docker container run -m 512m --memory-reservation=256m nginx
+```
+
+### Swap
 
 - To **disable swap**, set the **--memory** and **--memory-swap** options to the same value.
 
@@ -83,18 +101,21 @@ docker container run --rm -it --name mem_with_limit --memory 512m --memory-swap 
 # stress: WARN: [1] (418) now reaping child worker processes
 # stress: FAIL: [1] (422) kill error: No such process
 # stress: FAIL: [1] (452) failed run completed in 0s
-docker container run --name memory_limit_stress --memory 50m --memory-swap 50m -it progrium/stress --vm 1 --vm-bytes 62914560 --timeout 1s
+docker container run --name memory_limit_stress --memory 50m --memory-swap 50m -it polinux/stress stress --vm 1 --vm-bytes 60M --timeout 10s
 
 
 # prints "OOMKilled": true
 docker container inspect memory_limit_stress | grep -i oom
 ```
 
-- When memory limit is set while launching the container, the same reflects in the cgroup file **memory.limit_in_bytes**. Get the **docker container ID** and search for the same inside the **`/sys/fs/cgroup/memory`** directory, if the cgroup is not known (default cgroup is **docker**).
+- When memory limit is set while launching the container, the same reflects in the cgroup file **memory.limit_in_bytes**. Get the **docker container ID** and search for the same inside the **`/sys/fs/cgroup/memory`** directory, if the cgroup is not known (default cgroup is **docker**). We can also check the cgroup to which the container belongs to using `systemd-cgtop` if the container is using systemd cgroup
 
 ```bash
 # This should print the memory limit set
 cat /sys/fs/cgroup/memory/docker/<container_id>/memory.limit_in_bytes
+
+# or in case of cgroup v2
+cat /sys/fs/cgroup/docker/<container_id>/memory.max
 ```
 
 ---
@@ -104,4 +125,7 @@ cat /sys/fs/cgroup/memory/docker/<container_id>/memory.limit_in_bytes
 - [Understanding Docker Container Memory Limit Behavior](https://medium.com/faun/understanding-docker-container-memory-limit-behavior-41add155236c)
 - [How to limit a docker container’s resources on ubuntu 18.04](https://hostadvice.com/how-to/how-to-limit-a-docker-containers-resources-on-ubuntu-18-04/)
 - [How Docker uses cgroups to set resource limits?](https://shekhargulati.com/2019/01/03/how-docker-uses-cgroups-to-set-resource-limits/)
+- [Setting Memory And CPU Limits In Docker](https://www.baeldung.com/ops/docker-memory-limit)
+- [Docker Container CPU Limits Explained](https://www.thorsten-hans.com/docker-container-cpu-limits-explained/)
+- [Docker Container Memory Limits Explained](https://www.thorsten-hans.com/limit-memory-for-docker-containers/)
 - [Setting Memory And CPU Limits In Docker](https://www.baeldung.com/ops/docker-memory-limit)
